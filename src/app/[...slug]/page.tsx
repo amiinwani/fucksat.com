@@ -1,9 +1,46 @@
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{
     slug: string[];
   }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  
+  if (!slug || slug.length === 0) {
+    return {
+      title: "SAT Speedrun - AI-Powered SAT Prep Platform | CurioLearn",
+      description: "Speedrun your SAT prep in days with AI that transforms any content into targeted practice.",
+    };
+  }
+  
+  // Join the slug parts to reconstruct the YouTube URL
+  let youtubeVideoLink = slug.join('/');
+  
+  // Try to decode the URL if it's URL-encoded
+  try {
+    const decodedLink = decodeURIComponent(youtubeVideoLink);
+    youtubeVideoLink = decodedLink;
+  } catch {
+    // URL decoding failed, use original
+  }
+  
+  return {
+    title: `Generate SAT Questions from YouTube Video | SAT Speedrun`,
+    description: `Transform this YouTube video into targeted SAT practice questions instantly with our AI-powered speedrun platform.`,
+    openGraph: {
+      title: `Generate SAT Questions from YouTube Video | SAT Speedrun`,
+      description: `Transform this YouTube video into targeted SAT practice questions instantly with our AI-powered speedrun platform.`,
+      url: `https://sat.curiolearn.co/${encodeURIComponent(youtubeVideoLink)}`,
+    },
+    twitter: {
+      title: `Generate SAT Questions from YouTube Video | SAT Speedrun`,
+      description: `Transform this YouTube video into targeted SAT practice questions instantly.`,
+    },
+  };
 }
 
 export default async function CatchAllPage({ params }: PageProps) {

@@ -12,6 +12,28 @@ export default function Home() {
           height={38}
           priority
         />
+        
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl font-bold mb-4">YouTube to CurioLearn Redirect</h1>
+          <p className="text-lg mb-6">
+            Add any YouTube video link to the URL to redirect to CurioLearn's YouTube generator.
+          </p>
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+            <p className="font-mono text-sm">
+              Example: yourdomain.com/dQw4w9WgXcQ
+            </p>
+            <p className="font-mono text-sm mt-2">
+              Redirects to: sat.curiolearn.co/generate/youtube/dQw4w9WgXcQ
+            </p>
+            <p className="font-mono text-sm mt-4">
+              For full URLs, use URL encoding:
+            </p>
+            <p className="font-mono text-sm mt-2">
+              yourdomain.com/https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
+            </p>
+          </div>
+        </div>
+
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}

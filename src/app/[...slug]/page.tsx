@@ -1,71 +1,65 @@
 import { redirect } from 'next/navigation';
 
 interface PageProps {
-  params: Promise<{ slug: string[] }>;
+  params: {
+    slug: string[];
+  };
 }
 
-export default async function YouTubeRedirect({ params }: PageProps) {
-  const { slug } = await params;
+export default function CatchAllPage({ params }: PageProps) {
+  const { slug } = params;
   
-  // Join the slug array to recreate the original path
-  const originalPath = slug.join('/');
+  if (!slug || slug.length === 0) {
+    redirect('/');
+  }
   
-  // Function to extract YouTube video ID from various URL formats
-  function getYouTubeVideoId(url: string): string | null {
-    // Handle different YouTube URL formats
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/watch\?.*&v=)([^&\n?#]+)/,
-      /^([a-zA-Z0-9_-]{11})$/ // Direct video ID
+  // Join the slug parts to reconstruct the YouTube URL
+  let youtubeVideoLink = slug.join('/');
+  
+  // Try to decode the URL if it's URL-encoded
+  try {
+    const decodedLink = decodeURIComponent(youtubeVideoLink);
+    youtubeVideoLink = decodedLink;
+  } catch (error) {
+    // URL decoding failed, use original
+  }
+  
+  // Validate YouTube URL
+  const isValidYouTubeUrl = (url: string): boolean => {
+    // First check if it's a full YouTube URL
+    const youtubeUrlPatterns = [
+      /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/i,
+      /^https?:\/\/(www\.)?youtu\.be\/[\w-]+/i,
+      /^https?:\/\/(www\.)?youtube\.com\/embed\/[\w-]+/i,
+      /^https?:\/\/(www\.)?youtube\.com\/v\/[\w-]+/i,
     ];
     
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) {
-        return match[1];
+    if (youtubeUrlPatterns.some(pattern => pattern.test(url))) {
+      return true;
+    }
+    
+    // For video IDs, check if it's exactly 11 characters and follows YouTube ID pattern
+    if (url.length === 11) {
+      // YouTube IDs typically start with letters and contain a mix of letters, numbers, hyphens, and underscores
+      // They don't typically contain consecutive hyphens or underscores
+      if (/^[A-Za-z0-9_-]{11}$/.test(url) && !/--|__|-_|_-/.test(url)) {
+        // Additional check: YouTube IDs typically have a good mix of characters
+        const hasLetters = /[A-Za-z]/.test(url);
+        const hasNumbers = /[0-9]/.test(url);
+        
+        if (hasLetters && hasNumbers) {
+          return true;
+        }
       }
     }
     
-    return null;
+    return false;
+  };
+  
+  if (isValidYouTubeUrl(youtubeVideoLink)) {
+    const curioLearnUrl = `https://sat.curiolearn.co/generate/youtube/${encodeURIComponent(youtubeVideoLink)}`;
+    redirect(curioLearnUrl);
+  } else {
+    redirect('/');
   }
-  
-  // Function to check if the URL is a YouTube URL
-  function isYouTubeUrl(url: string): boolean {
-    return /(?:youtube\.com|youtu\.be)/i.test(url) || /^[a-zA-Z0-9_-]{11}$/.test(url);
-  }
-  
-  // Decode URL components in case they are encoded
-  const decodedPath = decodeURIComponent(originalPath);
-  
-  // Check if this looks like a YouTube URL or video ID
-  if (isYouTubeUrl(decodedPath)) {
-    // Try to extract video ID
-    const videoId = getYouTubeVideoId(decodedPath);
-    
-    if (videoId) {
-      // Construct the full YouTube URL for the redirect
-      const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-      const redirectUrl = `https://sat.curiolearn.co/generate/youtube/${encodeURIComponent(youtubeUrl)}`;
-      
-      redirect(redirectUrl);
-    }
-  }
-  
-  // If the path contains a full YouTube URL, use it directly
-  if (decodedPath.includes('youtube.com') || decodedPath.includes('youtu.be')) {
-    // If it's already a full URL, use it as is
-    let youtubeUrl = decodedPath;
-    
-    // Ensure it starts with https://
-    if (!youtubeUrl.startsWith('http')) {
-      youtubeUrl = `https://${youtubeUrl}`;
-    }
-    
-    const redirectUrl = `https://sat.curiolearn.co/generate/youtube/${encodeURIComponent(youtubeUrl)}`;
-    redirect(redirectUrl);
-  }
-  
-  // If we can't identify it as a YouTube URL, still try to redirect
-  // in case it's a different format we didn't account for
-  const redirectUrl = `https://sat.curiolearn.co/generate/youtube/${encodeURIComponent(decodedPath)}`;
-  redirect(redirectUrl);
 }

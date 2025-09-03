@@ -1,60 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube to CurioLearn Redirect Service
 
-## YouTube Redirect System
+This Next.js application provides a redirect service that takes YouTube video links and redirects them to CurioLearn's YouTube generator platform.
 
-This application automatically redirects YouTube video links to CurioLearn's SAT generator.
+## How it Works
 
-### How it works
+When someone visits `yourdomain.com/[youtubevideolink]`, they are automatically redirected to `https://sat.curiolearn.co/generate/youtube/[youtubevideolink]`.
 
-When someone visits `yourwebsite.com/[youtube-video-link]`, they are automatically redirected to:
-`https://sat.curiolearn.co/generate/youtube/[youtube-video-link]`
+## Features
 
-### Supported YouTube URL formats
+- ✅ **Automatic Redirect**: Seamlessly redirects YouTube links to CurioLearn
+- ✅ **URL Encoding**: Properly handles special characters in URLs
+- ✅ **Multiple YouTube Formats**: Supports various YouTube URL formats:
+  - `https://youtube.com/watch?v=VIDEO_ID`
+  - `https://www.youtube.com/watch?v=VIDEO_ID`
+  - `https://youtu.be/VIDEO_ID`
+  - `https://youtube.com/embed/VIDEO_ID`
+  - `https://youtube.com/v/VIDEO_ID`
+  - Just the video ID (e.g., `dQw4w9WgXcQ`)
+- ✅ **Edge Case Handling**: Manages URLs with additional parameters (timestamps, playlists, etc.)
+- ✅ **Validation**: Validates YouTube link patterns before redirecting
+- ✅ **Fallback**: Invalid links redirect to the home page
 
-- `https://www.youtube.com/watch?v=VIDEO_ID`
-- `https://youtu.be/VIDEO_ID`
-- `youtube.com/watch?v=VIDEO_ID`
-- `VIDEO_ID` (direct video ID)
-- `https://www.youtube.com/embed/VIDEO_ID`
+## Implementation Details
 
-### Examples
+### Catch-All Route (`src/app/[...slug]/page.tsx`)
+The main redirect logic is handled by a catch-all route that:
+- Captures all non-root paths
+- Reconstructs the YouTube URL from the slug parts
+- Handles URL decoding for encoded URLs
+- Validates YouTube URLs using multiple patterns
+- Redirects valid URLs to CurioLearn
+- Redirects invalid URLs to the home page
 
-- Visit: `yourwebsite.com/https://www.youtube.com/watch?v=dQw4w9WgXcQ`
-- Redirects to: `https://sat.curiolearn.co/generate/youtube/https%3A//www.youtube.com/watch%3Fv%3DdQw4w9WgXcQ`
+### URL Validation
+The service validates YouTube URLs using multiple criteria:
+1. **Full YouTube URLs**: Matches standard YouTube URL patterns
+2. **Video IDs**: Must be exactly 11 characters with a mix of letters and numbers
+3. **Character Validation**: Ensures proper YouTube ID character patterns
 
-See `TEST_CASES.md` for comprehensive testing examples.
+### Next.js Config (`next.config.ts`)
+Simple configuration without redirects to let the catch-all route handle everything.
 
-## Getting Started
+## Usage Examples
 
-First, run the development server:
+```
+# YouTube Video ID (recommended)
+yourdomain.com/dQw4w9WgXcQ
+→ https://sat.curiolearn.co/generate/youtube/dQw4w9WgXcQ
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# URL-encoded full YouTube URL
+yourdomain.com/https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
+→ https://sat.curiolearn.co/generate/youtube/https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
+
+# Invalid URL
+yourdomain.com/invalid-url
+→ yourdomain.com/ (redirects to home page)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Edge Cases Handled
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **URL Encoding**: Special characters like `&`, `=`, `?` are properly encoded
+2. **Multiple Parameters**: URLs with timestamps, playlists, etc. are preserved
+3. **Invalid Links**: Non-YouTube links redirect to the home page
+4. **Empty Paths**: Root path (`/`) shows the main page
+5. **Static Files**: Images, CSS, JS files are not affected by redirects
+6. **Video ID Validation**: Only valid YouTube video IDs are accepted
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+```bash
+# Install dependencies
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Run development server
+npm run dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build for production
+npm run build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Start production server
+npm start
+```
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This application can be deployed to any platform that supports Next.js:
+- Vercel (recommended)
+- Netlify
+- Railway
+- AWS
+- Google Cloud Platform
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testing
+
+The implementation has been tested with various YouTube URL formats and edge cases:
+- ✅ Full YouTube URLs (URL-encoded)
+- ✅ YouTube Video IDs (11 characters)
+- ✅ URLs with additional parameters
+- ✅ Special characters
+- ✅ Invalid URLs (fallback behavior)
+
+## Security Considerations
+
+- Only YouTube URLs are redirected to CurioLearn
+- Invalid URLs redirect to the home page instead of external sites
+- URL encoding prevents injection attacks
+- Strict validation prevents malicious redirects
+- Video ID validation ensures only legitimate YouTube IDs are accepted

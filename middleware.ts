@@ -1,1 +1,1 @@
- 
+// Middleware removed - using catch-all route for YouTube redirects

@@ -20,7 +20,7 @@ export default function CatchAllPage({ params }: PageProps) {
   try {
     const decodedLink = decodeURIComponent(youtubeVideoLink);
     youtubeVideoLink = decodedLink;
-  } catch (error) {
+  } catch {
     // URL decoding failed, use original
   }
   

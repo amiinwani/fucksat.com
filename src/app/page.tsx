@@ -16,7 +16,7 @@ export default function Home() {
         <div className="text-center sm:text-left">
           <h1 className="text-2xl font-bold mb-4">YouTube to CurioLearn Redirect</h1>
           <p className="text-lg mb-6">
-            Add any YouTube video link to the URL to redirect to CurioLearn's YouTube generator.
+            Add any YouTube video link to the URL to redirect to CurioLearn&apos;s YouTube generator.
           </p>
           <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
             <p className="font-mono text-sm">

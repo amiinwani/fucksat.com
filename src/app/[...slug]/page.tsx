@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 }
 
-export default function CatchAllPage({ params }: PageProps) {
-  const { slug } = params;
+export default async function CatchAllPage({ params }: PageProps) {
+  const { slug } = await params;
   
   if (!slug || slug.length === 0) {
     redirect('/');

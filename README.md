@@ -1,5 +1,29 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## YouTube Redirect System
+
+This application automatically redirects YouTube video links to CurioLearn's SAT generator.
+
+### How it works
+
+When someone visits `yourwebsite.com/[youtube-video-link]`, they are automatically redirected to:
+`https://sat.curiolearn.co/generate/youtube/[youtube-video-link]`
+
+### Supported YouTube URL formats
+
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `youtube.com/watch?v=VIDEO_ID`
+- `VIDEO_ID` (direct video ID)
+- `https://www.youtube.com/embed/VIDEO_ID`
+
+### Examples
+
+- Visit: `yourwebsite.com/https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+- Redirects to: `https://sat.curiolearn.co/generate/youtube/https%3A//www.youtube.com/watch%3Fv%3DdQw4w9WgXcQ`
+
+See `TEST_CASES.md` for comprehensive testing examples.
+
 ## Getting Started
 
 First, run the development server:

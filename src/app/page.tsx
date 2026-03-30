@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+import { BLITZ_SAT_ORIGIN } from "@/lib/youtube-redirect";
 
 export default function Home() {
-  // Redirect root path to CurioLearn
-  redirect('https://sat.curiolearn.co');
+  redirect(BLITZ_SAT_ORIGIN);
 }

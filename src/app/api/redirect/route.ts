@@ -1,30 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  BLITZ_SAT_ORIGIN,
+  buildBlitzSatGenerateUrl,
+  isValidYouTubeUrl,
+} from "@/lib/youtube-redirect";
 
+export const runtime = "edge";
+
+/**
+ * Query-style redirect: /api/redirect?url=<youtube url or id>
+ * 301: valid YouTube target (browser may cache)
+ * 302: missing/invalid → BlitzSAT homepage
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const youtubeUrl = searchParams.get('url');
-  
+  const youtubeUrl = searchParams.get("url");
+
   if (!youtubeUrl) {
-    return NextResponse.redirect(new URL('/', request.url), 302);
+    return NextResponse.redirect(new URL("/", BLITZ_SAT_ORIGIN), 302);
   }
-  
-  // Validate YouTube URL
-  const isValidYouTubeUrl = (url: string): boolean => {
-    const youtubePatterns = [
-      /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/i,
-      /^https?:\/\/(www\.)?youtu\.be\/[\w-]+/i,
-      /^https?:\/\/(www\.)?youtube\.com\/embed\/[\w-]+/i,
-      /^https?:\/\/(www\.)?youtube\.com\/v\/[\w-]+/i,
-      /^[\w-]{11}$/, // YouTube video ID pattern (11 characters)
-    ];
-    
-    return youtubePatterns.some(pattern => pattern.test(url));
-  };
-  
+
   if (isValidYouTubeUrl(youtubeUrl)) {
-    const curioLearnUrl = `https://sat.curiolearn.co/generate/youtube/${encodeURIComponent(youtubeUrl)}`;
-    return NextResponse.redirect(curioLearnUrl, 301);
-  } else {
-    return NextResponse.redirect(new URL('/', request.url), 302);
+    return NextResponse.redirect(buildBlitzSatGenerateUrl(youtubeUrl), 301);
   }
+
+  return NextResponse.redirect(new URL("/", BLITZ_SAT_ORIGIN), 302);
 }

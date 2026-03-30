@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import {
-  BLITZ_SAT_ORIGIN,
+  BLITZ_SAT_HOME_URL,
   buildBlitzSatGenerateUrl,
   isValidYouTubeUrl,
   normalizeYoutubeLinkFromSegments,
@@ -20,7 +20,7 @@ export default async function CatchAllPage({ params }: PageProps) {
   const { slug } = await params;
 
   if (!slug || slug.length === 0) {
-    redirect(BLITZ_SAT_ORIGIN);
+    redirect(BLITZ_SAT_HOME_URL);
   }
 
   const youtubeVideoLink = normalizeYoutubeLinkFromSegments(slug);
@@ -29,5 +29,5 @@ export default async function CatchAllPage({ params }: PageProps) {
     redirect(buildBlitzSatGenerateUrl(youtubeVideoLink));
   }
 
-  redirect(BLITZ_SAT_ORIGIN);
+  redirect(BLITZ_SAT_HOME_URL);
 }

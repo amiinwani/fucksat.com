@@ -1,19 +1,17 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
-  BLITZ_SAT_ORIGIN,
+  BLITZ_SAT_HOME_URL,
   buildBlitzSatGenerateUrl,
   isValidYouTubeUrl,
   normalizeYoutubeLinkFromSegments,
 } from "@/lib/youtube-redirect";
 
 /**
- * Edge middleware runs before any Server Components / RSC payload.
- * Redirects here avoid rendering the catch-all page and heavy layout work on redirect paths.
+ * Edge middleware: redirect before RSC / React — smallest hot path.
  *
- * Status codes:
- * - 301: valid YouTube URL or ID → BlitzSAT generator (cacheable; repeat visits skip this origin)
- * - 302: `/` or invalid path → BlitzSAT homepage
+ * 301 → valid YouTube → `https://www.blitzsat.com/generate/youtube/<encoded>`
+ * 302 → `/` or invalid → `https://www.blitzsat.com/`
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,12 +21,12 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/", BLITZ_SAT_ORIGIN), 302);
+    return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);
   }
 
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 0) {
-    return NextResponse.redirect(new URL("/", BLITZ_SAT_ORIGIN), 302);
+    return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);
   }
 
   const youtubeVideoLink = normalizeYoutubeLinkFromSegments(segments);
@@ -37,15 +35,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(buildBlitzSatGenerateUrl(youtubeVideoLink), 301);
   }
 
-  return NextResponse.redirect(new URL("/", BLITZ_SAT_ORIGIN), 302);
+  return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);
 }
 
 export const config = {
   matcher: [
     "/",
-    /*
-     * Skip: static files, Next internals — everything else hits middleware.
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:ico|png|jpg|jpeg|gif|svg|webp|txt|xml|json|webmanifest)$).*)",
   ],
 };

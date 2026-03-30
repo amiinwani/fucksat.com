@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://blitzsat.com"),
+  metadataBase: new URL("https://www.blitzsat.com"),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "SAT Speedrun - AI-Powered SAT Prep Platform",
     description: "Speedrun your SAT prep in days with AI that transforms any content into targeted practice. Join students who've achieved their dream scores in just days.",
-    url: "https://blitzsat.com",
+    url: "https://www.blitzsat.com",
     siteName: 'SAT Speedrun by CurioLearn',
     images: [
       {
@@ -113,7 +113,7 @@ export default function RootLayout({
               "@type": "EducationalApplication",
               "name": "SAT Speedrun",
               "description": "AI-powered SAT prep platform that helps students speedrun their way to their target scores",
-              "url": "https://blitzsat.com",
+              "url": "https://www.blitzsat.com",
               "applicationCategory": "EducationalApplication",
               "operatingSystem": "Web Browser",
               "offers": {
@@ -125,7 +125,7 @@ export default function RootLayout({
               "provider": {
                 "@type": "Organization",
                 "name": "CurioLearn",
-                "url": "https://blitzsat.com"
+                "url": "https://www.blitzsat.com"
               },
               "aggregateRating": {
                 "@type": "AggregateRating",

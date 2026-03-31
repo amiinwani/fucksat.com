@@ -5,8 +5,8 @@ import {
   BLITZ_SAT_ORIGIN,
   buildBlitzSatGenerateUrl,
   canonicalGenerateYoutubePathname,
+  extractYouTubeVideoId,
   getYoutubeRefFromGeneratePath,
-  isValidYouTubeUrl,
   normalizeYoutubeLinkFromSegments,
   YOUTUBE_GENERATE_PATH,
 } from "@/lib/youtube-redirect";
@@ -14,7 +14,7 @@ import {
 /**
  * Edge middleware: redirect before RSC / React — smallest hot path.
  *
- * 301 → valid YouTube → `https://www.blitzsat.com/generate/youtube/<encoded>`
+ * 301 → valid YouTube → `https://www.blitzsat.com/generate/youtube/<videoId>`
  * 302 → `/` or invalid → `https://www.blitzsat.com/`
  *
  * Paths already under `/generate/youtube/<payload>` are validated on the payload only
@@ -37,10 +37,11 @@ export function middleware(request: NextRequest) {
 
   if (pathname.startsWith(`${YOUTUBE_GENERATE_PATH}/`)) {
     const videoRef = getYoutubeRefFromGeneratePath(pathname);
-    if (videoRef === null || !isValidYouTubeUrl(videoRef)) {
+    const videoId = videoRef ? extractYouTubeVideoId(videoRef) : null;
+    if (!videoId) {
       return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);
     }
-    const canonicalPath = canonicalGenerateYoutubePathname(videoRef);
+    const canonicalPath = canonicalGenerateYoutubePathname(videoId);
     if (pathname !== canonicalPath) {
       return NextResponse.redirect(new URL(canonicalPath, BLITZ_SAT_ORIGIN), 301);
     }
@@ -53,9 +54,16 @@ export function middleware(request: NextRequest) {
   }
 
   const youtubeVideoLink = normalizeYoutubeLinkFromSegments(segments);
+  const withQuery = request.nextUrl.search
+    ? `${youtubeVideoLink}${request.nextUrl.search}`
+    : youtubeVideoLink;
+  const videoId =
+    extractYouTubeVideoId(withQuery) ??
+    extractYouTubeVideoId(youtubeVideoLink) ??
+    extractYouTubeVideoId(request.nextUrl.searchParams.get("v") ?? "");
 
-  if (isValidYouTubeUrl(youtubeVideoLink)) {
-    return NextResponse.redirect(buildBlitzSatGenerateUrl(youtubeVideoLink), 301);
+  if (videoId) {
+    return NextResponse.redirect(buildBlitzSatGenerateUrl(videoId), 301);
   }
 
   return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);

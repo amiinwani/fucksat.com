@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   BLITZ_SAT_HOME_URL,
   buildBlitzSatGenerateUrl,
-  isValidYouTubeUrl,
+  extractYouTubeVideoId,
 } from "@/lib/youtube-redirect";
 
 export const runtime = "edge";
@@ -20,8 +20,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);
   }
 
-  if (isValidYouTubeUrl(youtubeUrl)) {
-    return NextResponse.redirect(buildBlitzSatGenerateUrl(youtubeUrl), 301);
+  const videoId = extractYouTubeVideoId(youtubeUrl);
+  if (videoId) {
+    return NextResponse.redirect(buildBlitzSatGenerateUrl(videoId), 301);
   }
 
   return NextResponse.redirect(BLITZ_SAT_HOME_URL, 302);

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import {
   BLITZ_SAT_HOME_URL,
   buildSatCurioGenerateUrl,
-  isValidYouTubeUrl,
+  extractYouTubeVideoId,
 } from "@/lib/youtube-redirect";
 
 interface PageProps {
@@ -17,18 +17,13 @@ interface PageProps {
  */
 export default async function GenerateYoutubePage({ params }: PageProps) {
   const { videoRef: rawSegment } = await params;
-  let videoRef: string;
-  try {
-    videoRef = decodeURIComponent(rawSegment);
-  } catch {
+  const videoId = extractYouTubeVideoId(rawSegment);
+
+  if (!videoId) {
     redirect(BLITZ_SAT_HOME_URL);
   }
 
-  if (!isValidYouTubeUrl(videoRef)) {
-    redirect(BLITZ_SAT_HOME_URL);
-  }
-
-  const src = buildSatCurioGenerateUrl(videoRef);
+  const src = buildSatCurioGenerateUrl(videoId);
 
   return (
     <iframe

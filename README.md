@@ -1,70 +1,95 @@
-# YouTube to CurioLearn Redirect Service
+# F\*ckSAT Redirect Gateway (fucksat.com → BlitzSAT)
 
-This Next.js application provides a redirect service that takes YouTube video links and redirects them to CurioLearn's YouTube generator platform.
+This repo powers **fucksat.com**, a tiny Next.js redirect gateway that converts “messy” YouTube links into the **one canonical SAT generator URL** on **BlitzSAT**:
 
-## How it Works
+- **Canonical destination (always):** `https://www.blitzsat.com/generate/youtube/<VIDEO_ID>`
 
-When someone visits `yourdomain.com/[youtubevideolink]`, they are automatically redirected to `https://sat.curiolearn.co/generate/youtube/[youtubevideolink]`.
+Backlinks:
+- **BlitzSAT homepage:** `https://www.blitzsat.com/`
+- **BlitzSAT YouTube SAT generator:** `https://www.blitzsat.com/generate/youtube/`
 
-## Features
+## What it does (in plain English)
 
-- ✅ **Automatic Redirect**: Seamlessly redirects YouTube links to CurioLearn
-- ✅ **URL Encoding**: Properly handles special characters in URLs
-- ✅ **Multiple YouTube Formats**: Supports various YouTube URL formats:
-  - `https://youtube.com/watch?v=VIDEO_ID`
-  - `https://www.youtube.com/watch?v=VIDEO_ID`
-  - `https://youtu.be/VIDEO_ID`
-  - `https://youtube.com/embed/VIDEO_ID`
-  - `https://youtube.com/v/VIDEO_ID`
-  - Just the video ID (e.g., `dQw4w9WgXcQ`)
-- ✅ **Edge Case Handling**: Manages URLs with additional parameters (timestamps, playlists, etc.)
-- ✅ **Validation**: Validates YouTube link patterns before redirecting
-- ✅ **Fallback**: Invalid links redirect to the home page
+You paste a YouTube link (or just a video ID) into **fucksat.com** and it will:
 
-## Implementation Details
+- **Extract the YouTube video ID** (the 11-character code)
+- **Redirect you to BlitzSAT** using the exact format:
+  - `https://www.blitzsat.com/generate/youtube/<VIDEO_ID>`
 
-### Catch-All Route (`src/app/[...slug]/page.tsx`)
-The main redirect logic is handled by a catch-all route that:
-- Captures all non-root paths
-- Reconstructs the YouTube URL from the slug parts
-- Handles URL decoding for encoded URLs
-- Validates YouTube URLs using multiple patterns
-- Redirects valid URLs to CurioLearn
-- Redirects invalid URLs to the home page
+That’s it — no extra query strings, no encoded full URL in the final path, just the video ID.
 
-### URL Validation
-The service validates YouTube URLs using multiple criteria:
-1. **Full YouTube URLs**: Matches standard YouTube URL patterns
-2. **Video IDs**: Must be exactly 11 characters with a mix of letters and numbers
-3. **Character Validation**: Ensures proper YouTube ID character patterns
+## Usage (examples)
 
-### Next.js Config (`next.config.ts`)
-Simple configuration without redirects to let the catch-all route handle everything.
-
-## Usage Examples
+These are the common formats users type:
 
 ```
-# YouTube Video ID (recommended)
-yourdomain.com/dQw4w9WgXcQ
-→ https://sat.curiolearn.co/generate/youtube/dQw4w9WgXcQ
+https://fucksat.com/9szhjhO9epA
+→ https://www.blitzsat.com/generate/youtube/9szhjhO9epA
 
-# URL-encoded full YouTube URL
-yourdomain.com/https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
-→ https://sat.curiolearn.co/generate/youtube/https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
+https://fucksat.com/https://www.youtube.com/watch?v=9szhjhO9epA
+→ https://www.blitzsat.com/generate/youtube/9szhjhO9epA
 
-# Invalid URL
-yourdomain.com/invalid-url
-→ yourdomain.com/ (redirects to home page)
+https://fucksat.com/https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D9szhjhO9epA
+→ https://www.blitzsat.com/generate/youtube/9szhjhO9epA
+
+https://fucksat.com/https://youtu.be/9szhjhO9epA
+→ https://www.blitzsat.com/generate/youtube/9szhjhO9epA
 ```
 
-## Edge Cases Handled
+## Supported inputs
 
-1. **URL Encoding**: Special characters like `&`, `=`, `?` are properly encoded
-2. **Multiple Parameters**: URLs with timestamps, playlists, etc. are preserved
-3. **Invalid Links**: Non-YouTube links redirect to the home page
-4. **Empty Paths**: Root path (`/`) shows the main page
-5. **Static Files**: Images, CSS, JS files are not affected by redirects
-6. **Video ID Validation**: Only valid YouTube video IDs are accepted
+- **Plain YouTube video ID** (11 characters)
+- **YouTube watch URLs** (`youtube.com/watch?v=...`)
+- **Short links** (`youtu.be/...`)
+- **Embed / legacy URLs** (`youtube.com/embed/...`, `youtube.com/v/...`)
+- **Weird pasted paths** (browsers may normalize `https://` in the path to `https:/` — we still try to extract the ID)
+
+## Implementation details (how it’s built)
+
+### Edge middleware (fast path)
+
+Most requests are handled in `middleware.ts` at the edge, so redirects happen before React renders.
+
+### Catch-all page (fallback)
+
+If middleware doesn’t run for some edge-case request shape, the fallback route `src/app/[...slug]/page.tsx` runs the same extraction logic and redirects.
+
+### Video ID extraction
+
+All redirect outputs are **canonicalized** to the video ID via a shared helper:
+
+- `extractYouTubeVideoId(...)` in `src/lib/youtube-redirect.ts`
+
+### Next.js config redirects
+
+`next.config.ts` includes a redirect rule so `/<VIDEO_ID>` always maps to:
+
+- `https://www.blitzsat.com/generate/youtube/<VIDEO_ID>`
+
+## SAT exam overview (SEO)
+
+The **SAT** is a standardized test used by many colleges in the United States. Most students focus on:
+
+- **SAT Math**: algebra, problem solving, data analysis, and some advanced math topics
+- **SAT Reading & Writing**: grammar, rhetoric, and reading comprehension from short passages
+
+Effective SAT prep usually comes down to:
+
+- **Targeted practice** (questions matched to the exact skill you’re missing)
+- **Error analysis** (why you missed it, not just the correct answer)
+- **Timed sets** to build pacing and consistency
+
+This project is designed to make it trivial to go from a YouTube lesson to a SAT practice flow on **BlitzSAT**:
+
+- `https://www.blitzsat.com/` (BlitzSAT)
+- `https://www.blitzsat.com/generate/youtube/` (YouTube → SAT practice generator)
+
+## Edge cases handled
+
+1. **Pasted full URLs in the path**: `https://fucksat.com/https://www.youtube.com/watch?v=...`
+2. **Browser-normalized paths**: `https://` may become `https:/` in the request path
+3. **Extra watch params**: we still extract the `v=` ID
+4. **Invalid links**: redirect to the BlitzSAT homepage
 
 ## Development
 
@@ -93,17 +118,18 @@ This application can be deployed to any platform that supports Next.js:
 
 ## Testing
 
-The implementation has been tested with various YouTube URL formats and edge cases:
-- ✅ Full YouTube URLs (URL-encoded)
-- ✅ YouTube Video IDs (11 characters)
-- ✅ URLs with additional parameters
-- ✅ Special characters
-- ✅ Invalid URLs (fallback behavior)
+Useful checks:
+
+```bash
+# Expected: Location: https://www.blitzsat.com/generate/youtube/9szhjhO9epA
+curl -sI "https://fucksat.com/https://www.youtube.com/watch?v=9szhjhO9epA"
+
+# Expected: Location: https://www.blitzsat.com/generate/youtube/9szhjhO9epA
+curl -sI "https://fucksat.com/9szhjhO9epA"
+```
 
 ## Security Considerations
 
-- Only YouTube URLs are redirected to CurioLearn
-- Invalid URLs redirect to the home page instead of external sites
-- URL encoding prevents injection attacks
-- Strict validation prevents malicious redirects
-- Video ID validation ensures only legitimate YouTube IDs are accepted
+- Only YouTube inputs that yield a valid 11-char video ID are redirected onward
+- Redirect output is canonicalized to the video ID (prevents open redirects)
+- Invalid inputs go to `https://www.blitzsat.com/`

@@ -10,14 +10,16 @@ import {
   normalizeYoutubeLinkFromSegments,
   YOUTUBE_GENERATE_PATH,
 } from "@/lib/youtube-redirect";
+import { pantrioAppStoreDestination } from "@/lib/pantrio-app-store";
 import { zenithAppStoreDestination } from "@/lib/zenith-app-store";
 
 const ZENITH_PATH = "/zenith";
+const PANTRIO_PATH = "/pantrio";
 
 /**
  * Edge middleware: redirect before RSC / React — smallest hot path.
  *
- * 302 → `/zenith` → App Store (HTTPS, or `itms-apps://…` on iOS for in-app browsers)
+ * 302 → `/zenith`, `/pantrio` → App Store (HTTPS, or `itms-apps://…` on iOS for in-app browsers)
  * 301 → valid YouTube → `https://www.blitzsat.com/generate/youtube/<videoId>`
  * 302 → `/` or invalid → `https://www.blitzsat.com/`
  *
@@ -33,6 +35,11 @@ export function middleware(request: NextRequest) {
 
   if (pathname === ZENITH_PATH) {
     const dest = zenithAppStoreDestination(request.headers.get("user-agent"));
+    return NextResponse.redirect(dest, 302);
+  }
+
+  if (pathname === PANTRIO_PATH) {
+    const dest = pantrioAppStoreDestination(request.headers.get("user-agent"));
     return NextResponse.redirect(dest, 302);
   }
 

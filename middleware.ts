@@ -10,10 +10,14 @@ import {
   normalizeYoutubeLinkFromSegments,
   YOUTUBE_GENERATE_PATH,
 } from "@/lib/youtube-redirect";
+import { zenithAppStoreDestination } from "@/lib/zenith-app-store";
+
+const ZENITH_PATH = "/zenith";
 
 /**
  * Edge middleware: redirect before RSC / React — smallest hot path.
  *
+ * 302 → `/zenith` → App Store (HTTPS, or `itms-apps://…` on iOS for in-app browsers)
  * 301 → valid YouTube → `https://www.blitzsat.com/generate/youtube/<videoId>`
  * 302 → `/` or invalid → `https://www.blitzsat.com/`
  *
@@ -25,6 +29,11 @@ export function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();
+  }
+
+  if (pathname === ZENITH_PATH) {
+    const dest = zenithAppStoreDestination(request.headers.get("user-agent"));
+    return NextResponse.redirect(dest, 302);
   }
 
   if (pathname === "/") {
